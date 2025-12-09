@@ -1,13 +1,6 @@
 ---
-- name: set fact force_install to no
-  set_fact: force_install=no
-
-- name: set fact force_install to yes
-  set_fact: force_install=yes
-  when: es_allow_downgrades
-
 - name: Gracefully stop and remove elasticsearch package if switching between OSS and standard
-  become: yes
+  become: true
   block:
     - name: Check if the elasticsearch package is installed
       shell: "dpkg-query -W -f'${Status}' {{ es_other_package_name }}"
@@ -17,7 +10,7 @@
       check_mode: no
 
     - name: unhold elasticsearch package when switching to a different package type
-      become: yes
+      become: true
       dpkg_selections:
         name: "{{ es_other_package_name }}"
         selection: "install"
@@ -37,7 +30,7 @@
 
 - name: Install Elasticsearch repository
   when: es_use_repository
-  become: yes
+  become: true
   block:
     - name: Debian - Install apt-transport-https to support https APT downloads
       apt:
@@ -73,18 +66,18 @@
   check_mode: no
 
 - name: Debian - unhold elasticsearch version
-  become: yes
+  become: true
   dpkg_selections:
     name: "{{ es_package_name }}"
     selection: "install"
   when: not es_version_lock or (installed_es_version.stdout and installed_es_version.stdout != es_version)
 
 - name: Debian - Ensure elasticsearch is installed
-  become: yes
+  become: true
   apt:
     name: '{{ es_package_name }}{% if es_version is defined and es_version != "" %}={{ es_version }}{% endif %}'
     state: present
-    force: "{{ force_install }}"
+    allow_downgrades: "{{ 'yes' if es_allow_downgrades else 'no' }}"
     allow_unauthenticated: "{{ 'no' if es_apt_key else 'yes' }}"
     cache_valid_time: 86400
   when: es_use_repository
@@ -94,7 +87,7 @@
     ES_PATH_CONF: "{{ es_conf_dir }}"
 
 - name: Debian - hold elasticsearch version
-  become: yes
+  become: true
   dpkg_selections:
     name: "{{ es_package_name }}"
     selection: "hold"
@@ -105,7 +98,7 @@
     es_deb_url: "{% if es_version is version('7.0.0', '>=') %}{{ es_package_url }}-{{ es_version }}-amd64.deb{% else %}{{ es_package_url }}-{{ es_version }}.deb{% endif %}"
 
 - name: Debian - Install Elasticsearch from url
-  become: yes
+  become: true
   apt:
     deb: "{% if es_custom_package_url is defined %}{{ es_custom_package_url }}{% else %}{{ es_deb_url }}{% endif %}"
     state: present
