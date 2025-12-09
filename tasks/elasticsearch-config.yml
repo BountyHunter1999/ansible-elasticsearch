@@ -92,7 +92,18 @@
     force: yes
   notify: restart elasticsearch
 
-- name: Copy log4j2.properties File
+- name: Download log4j2.properties from GitHub based on version
+  become: true
+  get_url:
+    url: "https://raw.githubusercontent.com/elastic/elasticsearch/v{{ es_version }}/distribution/src/config/log4j2.properties"
+    dest: "{{ es_conf_dir }}/log4j2.properties"
+    owner: root
+    group: "{{ es_group }}"
+    mode: "660"
+  notify: restart elasticsearch
+  when: es_config_log4j2 == ''
+
+- name: Copy log4j2.properties File Template if provided
   become: true
   template:
     src: "{{ es_config_log4j2 }}"
