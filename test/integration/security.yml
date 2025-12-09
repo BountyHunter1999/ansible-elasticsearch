@@ -2,7 +2,7 @@
 - name: Elasticsearch Xpack HTTP different keystore and truststore with password
   hosts: localhost
   post_tasks:
-    - include: elasticsearch/test/integration/debug.yml
+    - ansible.builtin.import_tasks: elasticsearch/test/integration/debug.yml
   roles:
     - elasticsearch
   vars:
@@ -39,18 +39,18 @@
           cluster:
             - all
           indices:
-            - names: '*'
+            - names: "*"
               privileges:
                 - all
         power_user:
           cluster:
             - monitor
           indices:
-            - names: '*'
+            - names: "*"
               privileges:
                 - all
         user:
           indices:
-            - names: '*'
+            - names: "*"
               privileges:
                 - read

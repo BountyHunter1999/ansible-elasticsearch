@@ -2,7 +2,7 @@
 - name: Setup Elasticsearch with security enabled and a trial license
   hosts: localhost
   post_tasks:
-    - include: elasticsearch/test/integration/debug.yml
+    - ansible.builtin.import_tasks: elasticsearch/test/integration/debug.yml
   roles:
     - elasticsearch
   vars:
@@ -62,26 +62,26 @@
           cluster:
             - all
           indices:
-            - names: '*'
+            - names: "*"
               privileges:
                 - all
         power_user:
           cluster:
             - monitor
           indices:
-            - names: '*'
+            - names: "*"
               privileges:
                 - all
         user:
           indices:
-            - names: '*'
+            - names: "*"
               privileges:
                 - read
         kibana4_server:
           cluster:
-              - monitor
+            - monitor
           indices:
-            - names: '.kibana'
+            - names: ".kibana"
               privileges:
                 - all
       native:
@@ -89,7 +89,7 @@
           cluster:
             - manage_index_templates
           indices:
-            - names: 'logstash-*'
+            - names: "logstash-*"
               privileges:
                 - write
                 - delete
@@ -99,7 +99,7 @@
           cluster:
             - manage_index_templates
           indices:
-            - names: 'logstash-*'
+            - names: "logstash-*"
               privileges:
                 - write
                 - delete
