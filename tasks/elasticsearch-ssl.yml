@@ -24,6 +24,7 @@
     owner: "{{ es_user }}"
     group: "{{ es_group }}"
     mode: "640"
+    remote_src: "{{ es_ssl_remote_src }}"
   when: es_ssl_upload and es_ssl_keystore and es_ssl_truststore
   notify: restart elasticsearch
   register: copy_keystore
@@ -36,6 +37,7 @@
     owner: "{{ es_user }}"
     group: "{{ es_group }}"
     mode: "640"
+    remote_src: "{{ es_ssl_remote_src }}"
   when: es_ssl_upload and es_ssl_keystore and es_ssl_truststore
   notify: restart elasticsearch
   register: copy_truststore
@@ -48,6 +50,7 @@
     owner: "{{ es_user }}"
     group: "{{ es_group }}"
     mode: "640"
+    remote_src: "{{ es_ssl_remote_src }}"
   with_items:
     - "{{ es_ssl_key }}"
     - "{{ es_ssl_certificate }}"
@@ -64,6 +67,7 @@
     owner: "{{ es_user }}"
     group: "{{ es_group }}"
     mode: "640"
+    remote_src: "{{ es_ssl_remote_src }}"
   #Restart if this changes
   notify: restart elasticsearch
   when: es_ssl_upload and (es_ssl_certificate_authority is defined) and (es_ssl_certificate_authority|length > 0)
@@ -90,7 +94,7 @@
   become: true
   shell: "{{ es_home }}/bin/elasticsearch-keystore remove 'xpack.security.{{ item }}.ssl.keystore.secure_password'"
   when: es_ssl_keystore_password == "" and (copy_keystore.changed or (es_same_keystore and copy_truststore.changed))
-  ignore_errors: yes
+  ignore_errors: true
   with_items:
     - http
     - transport
@@ -99,7 +103,7 @@
   become: true
   shell: "{{ es_home }}/bin/elasticsearch-keystore remove 'xpack.security.{{ item }}.ssl.truststore.secure_password'"
   when: es_ssl_truststore_password == "" and (copy_truststore.changed or (es_same_keystore and copy_keystore.changed))
-  ignore_errors: yes
+  ignore_errors: true
   with_items:
     - http
     - transport
@@ -117,7 +121,7 @@
   become: true
   shell: "{{ es_home }}/bin/elasticsearch-keystore remove 'xpack.security.{{ item }}.ssl.secure_key_passphrase'"
   when: es_ssl_key_password == "" and copy_certificates.changed
-  ignore_errors: yes
+  ignore_errors: true
   with_items:
     - http
     - transport
